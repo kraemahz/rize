@@ -1,9 +1,10 @@
 async fn main() {
-    env_logger::init();
     let routes = warp::post()
         .and(warp::path("login"))
         .and(warp::body::json())
-        .and_then(handlers::login);
+        .and_then(handlers::login)
+        .with(utilities::rate_limit())
+        .with(with_logging());
 
     warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
 }
@@ -101,4 +102,34 @@ mod handlers {
 
         Ok(warp::reply::with_status("Login endpoint hit", StatusCode::OK))
     }
+}
+mod utilities {
+    use governor::{Quota, RateLimiter};
+    use std::num::NonZeroU32;
+    use std::time::Duration;
+    use warp::Filter;
+
+    pub fn rate_limit() -> impl Filter<Extract = (), Error = warp::Rejection> + Clone {
+        let limiter = RateLimiter::direct(Quota::per_minute(NonZeroU32::new(30).unwrap()));
+
+        warp::any()
+            .and_then(move || {
+                let limiter = limiter.clone();
+                async move {
+                    if let Err(_) = limiter.check_key(&()).await {
+                        Err(warp::reject::custom(utilities::RateLimitError))
+                    } else {
+                        Ok(())
+                    }
+                }
+            })
+    }
+
+    #[derive(Debug)]
+    pub struct RateLimitError;
+
+    impl warp::reject::Reject for RateLimitError {}
+}
+fn with_logging() -> impl Filter<Extract = (warp::log::Info,), Error = std::convert::Infallible> + Clone {
+    warp::log("rize_api")
 }
