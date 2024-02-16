@@ -74,3 +74,31 @@ mod auth {
         Ok(token)
     }
 }
+mod security {
+    use argon2::{self, Config};
+    use rand::{Rng, distributions::Alphanumeric};
+
+    pub fn hash_password(password: &str) -> String {
+        let salt: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(16)
+            .map(char::from)
+            .collect();
+        let config = Config::default();
+        argon2::hash_encoded(password.as_bytes(), salt.as_bytes(), &config).unwrap()
+    }
+
+    pub fn verify_password(hash: &str, password: &str) -> bool {
+        argon2::verify_encoded(hash, password.as_bytes()).unwrap_or(false)
+    }
+}
+mod handlers {
+    use warp::http::StatusCode;
+    use warp::{Rejection, Reply};
+
+    pub async fn login(body: serde_json::Value) -> Result<impl Reply, Rejection> {
+        // TODO: Implement password hashing and verification
+
+        Ok(warp::reply::with_status("Login endpoint hit", StatusCode::OK))
+    }
+}
