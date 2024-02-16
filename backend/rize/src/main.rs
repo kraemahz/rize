@@ -133,3 +133,37 @@ mod utilities {
 fn with_logging() -> impl Filter<Extract = (warp::log::Info,), Error = std::convert::Infallible> + Clone {
     warp::log("rize_api")
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use warp::{http::StatusCode, Filter};
+    use serde_json::json;
+
+    #[tokio::test]
+    async fn test_login_success() {
+        let api = filters::login();
+        let response = warp::test::request()
+            .method("POST")
+            .path("/login")
+            .json(&json!({"username": "user", "password": "pass"}))
+            .reply(&api)
+            .await;
+
+        assert_eq!(response.status(), StatusCode::OK);
+        // Further assertions can be made based on token presence etc.
+    }
+
+    #[tokio::test]
+    async fn test_login_failure() {
+        let api = filters::login();
+        let response = warp::test::request()
+            .method("POST")
+            .path("/login")
+            .json(&json!({"username": "wronguser", "password": "wrongpass"}))
+            .reply(&api)
+            .await;
+
+        assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+        // Further assertions can be made based on error messages etc.
+    }
+}
