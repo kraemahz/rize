@@ -1,7 +1,7 @@
-use std::collections::HashMap;
+use actix_web::{web, App, HttpResponse, HttpServer, Responder};
 use argon2::{self, Config};
 use serde::{Deserialize, Serialize};
-use actix_web::{web, App, HttpResponse, HttpServer, Responder};
+use std::collections::HashMap;
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=info");
     env_logger::init();
@@ -73,8 +73,11 @@ fn hash_password(password: &str) -> String {
 // This is a placeholder for a real user registration process
 fn add_new_user(username: String, password: String) {
     let password_hash = hash_password(&password);
-    USERS.insert(username.clone(), User {
-        username,
-        password_hash,
-    });
+    USERS.insert(
+        username.clone(),
+        User {
+            username,
+            password_hash,
+        },
+    );
 }
