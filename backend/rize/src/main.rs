@@ -20,6 +20,8 @@ mod handlers {
     use warp::http::StatusCode;
     use warp::{Rejection, Reply};
 
+            warp::{http::StatusCode, Rejection, Reply}
+
     pub async fn login(body: Value) -> Result<impl Reply, Rejection> {
         let client = db::connect_to_db().await?;
         // TODO: Implement authentication logic here
@@ -50,4 +52,25 @@ mod db {
     pub struct DbError;
 
     impl warp::reject::Reject for DbError {}
+}
+mod auth {
+    use jsonwebtoken::{encode, Header, EncodingKey, errors::Result};
+    use serde::{Deserialize, Serialize};
+
+    #[derive(Debug, Serialize, Deserialize)]
+    struct Claims {
+        sub: String,  // Subject (whom token refers to)
+        company: String,
+        exp: usize,   // Expiration time (as UTC timestamp)
+    }
+
+    pub fn generate_token(user_id: &str) -> Result<String> {
+        let my_claims = Claims {
+            sub: user_id.to_owned(),
+            company: "RizeCorp".to_owned(),
+            exp: 10000000000, //TODO: replace with an appropriate expiration time
+        };
+        let token = encode(&Header::default(), &my_claims, &EncodingKey::from_secret("secret_key".as_ref()))?;
+        Ok(token)
+    }
 }
