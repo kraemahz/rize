@@ -1,8 +1,16 @@
 [package]
 name = "rize"
 version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+edition = "2018"
 
 [dependencies]
+actix-web = "4"
+sqlx = { version = "0.5", features = ["runtime-actix-native-tls", "postgres"] }
+dotenv = "0.15"
+diesel = { version = "1.4.5", features = ["postgres", "r2d2", "chrono"] }
+jsonwebtoken = "7"
+bcrypt = "0.10.0"
+
+[[test]]
+name = "user_login"
+path = "tests/user_login.rs"
