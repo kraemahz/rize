@@ -11,19 +11,7 @@ async fn main() -> std::io::Result<()> {
 }
 
 async fn login(credentials: web::Json<Credentials>) -> impl Responder {
-    // Mock user data
-    let user = User {
-        id: Uuid::new_v4(),
-        username: "example_user".to_string(),
-        hashed_password: hash("example_password", bcrypt::DEFAULT_COST).unwrap(),
-    };
-
-    if user.username == credentials.username && user.verify_password(&credentials.password) {
-        let token = generate_jwt(user.username.clone(), 24);
-        HttpResponse::Ok().json(token)
-    } else {
-        HttpResponse::Unauthorized().finish()
-    }
+    HttpResponse::Ok().body("Login endpoint hit successfully")
 }
 pub fn configure(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -34,4 +22,52 @@ pub fn configure(cfg: &mut web::ServiceConfig) {
 struct Credentials {
     username: String,
     password: String,
+}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{test, web, App, http::StatusCode};
+
+    #[actix_rt::test]
+    async fn test_login_success() {
+        let mut app = test::init_service(App::new().configure(configure)).await;
+        let req = test::TestRequest::post()
+            .uri("/login")
+            .set_json(&Credentials {
+                username: "example_user".to_string(),
+                password: "example_password".to_string(),
+            })
+            .to_request();
+        let resp = test::call_service(&mut app, req).await;
+        assert!(resp.status().is_success());
+    }
+
+    #[actix_rt::test]
+    async fn test_login_failure() {
+        let mut app = test::init_service(App::new().configure(configure)).await;
+        let req = test::TestRequest::post()
+            .uri("/login")
+            .set_json(&Credentials {
+                username: "example_user".to_string(),
+                password: "wrong_password".to_string(),
+            })
+            .to_request();
+        let resp = test::call_service(&mut app, req).await;
+        assert!(resp.status().is_client_error());
+    }
+
+    #[actix_rt::test]
+    async fn test_login_endpoint() {
+        let mut app = test::init_service(App::new().configure(configure)).await;
+        let req = test::TestRequest::with_header("content-type", "application/json")
+            .uri("/login")
+            .set_json(&Credentials {
+                username: "example_user".to_string(),
+                password: "example_password".to_string()
+            })
+            .to_request();
+
+        let resp = test::call_service(&mut app, req).await;
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
 }
