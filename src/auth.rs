@@ -1,29 +1,29 @@
 use actix_web::{web, HttpResponse, Responder};
-use std::collections::HashMap;
-pub mod auth {
-    // Placeholder for authentication logic
-}
+use serde_json::json;
 
-pub struct LoginRequest {
+#[derive(Deserialize, Serialize)]
+pub struct LoginCredentials {
     pub username: String,
     pub password: String,
 }
-pub async fn login(info: web::Json<LoginRequest>) -> impl Responder {
-    // Placeholder for authentication logic
-    HttpResponse::Ok().body("Login endpoint reached.")
+
+#[derive(Serialize)]
+pub struct LoginResponse {
+    pub message: String,
+    pub user_data: Option<serde_json::Value>, // Placeholder for user-specific data
 }
-lazy_static! {
-    static ref USER_CREDENTIALS: HashMap<String, String> = {
-        let mut m = HashMap::new();
-        // This is a placeholder for user credentials.
-        // In a real-world scenario, you should retrieve these from a database and store passwords securely (hashed and salted).
-        m.insert("test_user".to_string(), "test_password".to_string()); // Example user
-        m
-    };
-}
-pub fn verify_user_credentials(credentials: &LoginCredentials) -> bool {
-    if let Some(stored_password) = USER_CREDENTIALS.get(&credentials.username) {
-        return stored_password == &credentials.password;
+
+pub async fn authenticate_and_respond(credentials: web::Json<LoginCredentials>) -> impl Responder {
+    if verify_user_credentials(&credentials) {
+        let user_data = json!({"profile": "Profile data", "content": "Personalized content"}); // Placeholder for user-specific data
+        HttpResponse::Ok().json(LoginResponse {
+            message: "Login successful".to_string(),
+            user_data: Some(user_data),
+        })
+    } else {
+        HttpResponse::Unauthorized().json(LoginResponse {
+            message: "Invalid username or password".to_string(),
+            user_data: None,
+        })
     }
-    false
 }
