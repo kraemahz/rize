@@ -20,3 +20,27 @@ async fn update_user_profile(user_id: web::Path<i32>, profile: web::Json<UserPro
 }
 
 // More API endpoints can be added here
+use actix_web::{web, HttpResponse, ResponseError};
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum UserProfileError {
+    #[error("user not found")]
+    NotFound,
+    #[error("invalid data provided")]
+    InvalidData,
+    #[error("internal server error")]
+    InternalServerError,
+}
+
+impl ResponseError for UserProfileError {
+    fn error_response(&self) -> HttpResponse {
+        match *self {
+            UserProfileError::NotFound => HttpResponse::NotFound().finish(),
+            UserProfileError::InvalidData => HttpResponse::BadRequest().finish(),
+            UserProfileError::InternalServerError => HttpResponse::InternalServerError().finish(),
+        }
+    }
+}
+
+// More error conversions would be added here if necessary
