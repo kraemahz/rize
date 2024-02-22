@@ -2,6 +2,7 @@ use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use bcrypt::verify;
 use sqlx::PgPool;
+use dotenv::dotenv;
 
 #[derive(Deserialize, Serialize)]
 pub struct LoginRequest {
@@ -16,7 +17,7 @@ pub struct LoginResponse {
 }
 
 pub async fn login_handler(
-    _db_pool: web::Data<PgPool>,
+    _db_pool: web::Data<PgPool>, // to be used when integrating with database
     login_request: web::Json<LoginRequest>,
 ) -> impl Responder {
     match authenticate(&login_request.username, &login_request.password).await {
@@ -29,7 +30,7 @@ pub async fn login_handler(
 }
 
 pub async fn authenticate(
-    _username: &str,
+    _username: &str, // to be used when integrating with database
     password: &str,
 ) -> Result<String, String> {
     // Here you would fetch the user data from the database and verify the password
@@ -38,16 +39,11 @@ pub async fn authenticate(
     match verify(password, password_hash) {
         Ok(valid) => {
             if valid {
-                Ok("placeholder_token".to_string())
+                Ok("placeholder_token".to_string()) // Placeholder token generation
             } else {
                 Err("Invalid credentials".to_string())
             }
         },
         Err(_) => Err("Invalid credentials".to_string()),
     }
-}
-
-pub async fn get_db_pool() -> PgPool {
-    // Create a database connection pool
-    PgPool::connect(&dotenv::var("DATABASE_URL").unwrap()).await.unwrap()
 }
