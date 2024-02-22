@@ -44,3 +44,35 @@ impl ResponseError for UserProfileError {
 }
 
 // More error conversions would be added here if necessary
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use actix_web::{test, web, App};
+
+    #[actix_rt::test]
+    async fn test_get_user_profile() {
+        let app = test::init_service(App::new().service(get_user_profile)).await;
+        let req = test::TestRequest::get().uri("/user/1").to_request();
+        let resp = test::call_service(&app, req).await;
+        assert!(resp.status().is_success());
+    }
+
+    #[actix_rt::test]
+    async fn test_update_user_profile() {
+        let profile_data = UserProfile {
+            id: 1,
+            username: String::from("testuser"),
+            email: String::from("test@example.com"),
+            preferences: UserPreferences {},
+        };
+        let app = test::init_service(App::new().service(update_user_profile)).await;
+        let req = test::TestRequest::post()
+            .uri("/user/1")
+            .set_json(&profile_data)
+            .to_request();
+        let resp = test::call_service(&app, req).await;
+        assert!(resp.status().is_success());
+    }
+
+    // More tests can be added here
+}
