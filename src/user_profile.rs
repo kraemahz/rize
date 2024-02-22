@@ -1,16 +1,22 @@
-use serde::{Deserialize, Serialize};
+use actix_web::{get, post, web, HttpResponse, Responder};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UserProfile {
-    pub id: i32,
-    pub username: String,
-    pub email: String,
-    pub preferences: UserPreferences,
+#[get("/user/{user_id}")]
+async fn get_user_profile(user_id: web::Path<i32>) -> impl Responder {
+    HttpResponse::Ok().json(UserProfile {
+        // Example data, needs to be fetched from database
+        id: *user_id,
+        username: String::from("example_user"),
+        email: String::from("user@example.com"),
+        preferences: UserPreferences {
+            // Example preferences
+        }
+    })
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct UserPreferences {
-    // Define the fields related to user preferences here
+#[post("/user/{user_id}")]
+async fn update_user_profile(user_id: web::Path<i32>, profile: web::Json<UserProfile>) -> impl Responder {
+    // Implement logic to update user profile, currently just echoing back
+    HttpResponse::Ok().json(profile.into_inner())
 }
 
-// Enums and any additional structs would be defined here
+// More API endpoints can be added here
