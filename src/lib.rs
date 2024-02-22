@@ -47,3 +47,4 @@ pub async fn authenticate(
         Err(_) => Err("Invalid credentials".to_string()),
     }
 }
+pub mod user_profile;
