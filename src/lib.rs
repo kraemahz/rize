@@ -1,8 +1,10 @@
+pub use user_profile::*;
+mod user_profile;
 use actix_web::{web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
 use bcrypt::verify;
-use sqlx::PgPool;
 use dotenv::dotenv;
+use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 
 #[derive(Deserialize, Serialize)]
 pub struct LoginRequest {
@@ -43,7 +45,7 @@ pub async fn authenticate(
             } else {
                 Err("Invalid credentials".to_string())
             }
-        },
+        }
         Err(_) => Err("Invalid credentials".to_string()),
     }
 }
