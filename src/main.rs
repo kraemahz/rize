@@ -1,7 +1,7 @@
-use actix_web::{web, HttpServer, App};
+use actix_web::{web, App, HttpServer};
+use dotenv::dotenv;
 use rize::login_handler;
 use sqlx::PgPool;
-use dotenv::dotenv;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
