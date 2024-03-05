@@ -1,10 +1,10 @@
-use sqlx::postgres::{PgPool, Postgres};
-use actix_web::{web, HttpResponse, Responder};
+use actix_web::{HttpServer, App, web, Responder, HttpResponse};
 use bigdecimal::BigDecimal;
 use serde::Deserialize;
+use sqlx::PgPool;
 
 #[derive(Deserialize)]
-struct SearchParams {
+pub struct SearchParams {
     address: Option<String>,
     city: Option<String>,
     state: Option<String>,
@@ -19,10 +19,17 @@ struct SearchParams {
     offset: Option<i64>,
 }
 
-// Handler for searching properties
-async fn search_properties(
-    pool: web::Data<PgPool>,
-    web::Query(search_params): web::Query<SearchParams>,
+pub async fn search_properties(
+    _pool: web::Data<PgPool>,
+    web::Query(_search_params): web::Query<SearchParams>,
+) -> impl Responder {
+    // TODO: Implement search logic
+    HttpResponse::Ok().json("Search endpoint reached")
+}
+
+async fn _search_properties(
+    _pool: web::Data<PgPool>,
+    web::Query(_search_params): web::Query<SearchParams>,
 ) -> impl Responder {
     // TODO: Implement search logic
     HttpResponse::Ok().json("Search endpoint reached")
