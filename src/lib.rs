@@ -1,49 +1,29 @@
+use sqlx::postgres::{PgPool, Postgres};
 use actix_web::{web, HttpResponse, Responder};
-use serde::{Deserialize, Serialize};
-use bcrypt::verify;
-use sqlx::PgPool;
+use bigdecimal::BigDecimal;
+use serde::Deserialize;
 
-
-#[derive(Deserialize, Serialize)]
-pub struct LoginRequest {
-    pub username: String,
-    pub password: String,
+#[derive(Deserialize)]
+struct SearchParams {
+    address: Option<String>,
+    city: Option<String>,
+    state: Option<String>,
+    zip_code: Option<String>,
+    country: Option<String>,
+    latitude: Option<f64>,
+    longitude: Option<f64>,
+    price_min: Option<BigDecimal>,
+    price_max: Option<BigDecimal>,
+    availability: Option<String>,
+    limit: Option<i64>,
+    offset: Option<i64>,
 }
 
-#[derive(Serialize)]
-pub struct LoginResponse {
-    pub message: String,
-    pub token: String,
-}
-
-pub async fn login_handler(
-    _db_pool: web::Data<PgPool>, // to be used when integrating with database
-    login_request: web::Json<LoginRequest>,
+// Handler for searching properties
+async fn search_properties(
+    pool: web::Data<PgPool>,
+    web::Query(search_params): web::Query<SearchParams>,
 ) -> impl Responder {
-    match authenticate(&login_request.username, &login_request.password).await {
-        Ok(token) => HttpResponse::Ok().json(LoginResponse {
-            message: "Login successful".to_string(),
-            token,
-        }),
-        Err(_) => HttpResponse::Unauthorized().body("Invalid credentials".to_string()),
-    }
-}
-
-pub async fn authenticate(
-    _username: &str, // to be used when integrating with database
-    password: &str,
-) -> Result<String, String> {
-    // Here you would fetch the user data from the database and verify the password
-    // This is a placeholder implementation
-    let password_hash = "$2b$12$exSx.uDIsxJ5quCH9QB8UuBhIqyIqiSOF/cUraRNSq5ERTlG60eJm"; // Example hash
-    match verify(password, password_hash) {
-        Ok(valid) => {
-            if valid {
-                Ok("placeholder_token".to_string()) // Placeholder token generation
-            } else {
-                Err("Invalid credentials".to_string())
-            }
-        },
-        Err(_) => Err("Invalid credentials".to_string()),
-    }
+    // TODO: Implement search logic
+    HttpResponse::Ok().json("Search endpoint reached")
 }
