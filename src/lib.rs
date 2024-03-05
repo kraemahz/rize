@@ -2,7 +2,7 @@ use actix_web::{web, HttpResponse, Responder};
 use serde::{Deserialize, Serialize};
 use bcrypt::verify;
 use sqlx::PgPool;
-use dotenv::dotenv;
+
 
 #[derive(Deserialize, Serialize)]
 pub struct LoginRequest {
