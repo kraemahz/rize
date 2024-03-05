@@ -1,0 +1,10 @@
+ALTER TABLE properties
+DROP COLUMN address,
+DROP COLUMN city,
+DROP COLUMN state,
+DROP COLUMN zip_code,
+DROP COLUMN country,
+DROP COLUMN latitude,
+DROP COLUMN longitude,
+DROP COLUMN price,
+DROP COLUMN availability;
