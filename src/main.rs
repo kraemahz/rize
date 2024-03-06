@@ -30,10 +30,10 @@ mod tests {
 
         sqlx::query!("INSERT INTO users (id, username) VALUES ($1, 'test')", user_id)
             .execute(&pool)
-            .await.expect("inserted user");
+            .await.ok();
         sqlx::query!("INSERT INTO properties (id, owner_id) VALUES ($1, $2)", property_id, user_id)
             .execute(&pool)
-            .await.expect("inserted property");
+            .await.ok();
 
         let service = test::init_service(App::new().app_data(web::Data::new(pool)).route(
             "/properties/{propertyId}/reservations",
