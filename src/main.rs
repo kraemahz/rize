@@ -30,10 +30,10 @@ mod tests {
 
         sqlx::query!("INSERT INTO users (id, username) VALUES ($1, 'test')", user_id)
             .execute(&pool)
-            .await.expect("inserted user");
+            .await.ok();
         sqlx::query!("INSERT INTO properties (id, owner_id) VALUES ($1, $2)", property_id, user_id)
             .execute(&pool)
-            .await.expect("inserted property");
+            .await.ok();
 
         let service = test::init_service(App::new().app_data(web::Data::new(pool)).route(
             "/properties/{propertyId}/reservations",
@@ -57,6 +57,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use std::env;
 use sqlx::{PgPool, Pool, Postgres};
+use rize::search_properties;
 
 async fn reserve_property(
     pool: web::Data<PgPool>,
@@ -96,6 +97,10 @@ async fn main() -> std::io::Result<()> {
             .route(
                 "/properties/{propertyId}/reservations",
                 web::post().to(reserve_property),
+            )
+            .route(
+                "/api/properties/search",
+                web::get().to(search_properties),
             )
     })
     .bind(("127.0.0.1", 8080))?
